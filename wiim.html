@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <title>WiiM Mini</title>
+    
+    <style>
+    body {
+      background-color: white;
+      margin: 0;
+      padding: 0;
+    }        
+    p {
+      color: black;
+      font-family: Helvetica;
+      font-size: 2.5vw;
+      margin: 25px 10px 25px 25px;
+    }
+    ul {
+      list-style-type: none;
+      margin-left: 0px;
+      margin-top: 0px;
+      margin-bottom: 0px;
+      margin-right: 0px;
+      padding: 0px;
+      overflow: hidden;
+      background-color: white;
+    }
+    li {
+      float: left;
+    }
+
+    li a {
+      display: block;
+      color: black;
+      padding-right: 10px;
+      padding-left: 8px;
+      padding-top: 5px;
+      padding-bottom: 0px;
+
+      margin: 0px;
+      text-align: center;
+      font-family: Helvetica;
+      font-size: 2vw;
+      text-decoration: none;
+    }
+
+.flex-container{
+	width: 100%;
+	min-height: 300px;
+	margin: 0 auto;
+	display: -webkit-flex; /* Safari */		
+	display: flex; /* Standard syntax */
+}
+.flex-container .column1{
+        width: 48%;
+	padding: 0px;
+	background: white;
+	-webkit-flex: 1; /* Safari */
+	-ms-flex: 1; /* IE 10 */
+	flex: 1; /* Standard syntax */
+}
+
+.flex-container .column2{
+	-webkit-flex: 1; /* Safari */
+	-ms-flex: 1; /* IE 10 */
+	flex: 1; /* Standard syntax */
+        background-color: white;
+        position: relative;
+}
+    #info {
+        position: absolute;
+        bottom: 0;
+    }
+
+    img { max-width: 100%; height: auto;}
+
+/* Controller Icons */
+#controller button {
+  border: 0;
+  font: 0/0 a;
+  width: 24px;
+  height: 24px;
+  text-shadow: none;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  background-position: center center;
+}
+
+#controller button:focus {
+  outline: 0;
+}
+
+body .element.right {
+  width: 200px;
+  float: right;
+  background-color: white;
+}
+
+body .element.left {
+  width: 200px;
+  float: left;
+  background-color: white;
+}
+
+/* Audio */
+#prev {
+  background-image: url("images/prev.svg");
+}
+
+#toggle[playing="true"] {
+  background-image: url("images/pause.svg");
+}
+
+#toggle[playing="false"], #toggle[playing=""] {
+  background-image: url("images/play.svg");
+}
+
+#next {
+  background-image: url("images/next.svg");
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  color: var(--theme-color);
+}
+
+/* Utils */
+.floating .left, .floating .right {
+  display: inline-block;
+}
+
+.floating .right {
+  float: right;
+}
+</style>
+    
+</head>
+<body>
+    <div id="myData" class="flex-container">
+	<div id="albumcover" class="column1"></div>
+	<div class="column2">
+            <div id="controller" class="floating">
+            <div class="left">
+            <ul>
+	    <li id="allmusic"></li>
+            <li id="lastfm"></li>
+            <li id="wiki"></li>
+            </ul>
+            </div>
+            <div class="right">
+              <button id="prev" class="clickable" title="Prev" onclick=sendCmd('prev');></button>
+              <button id="toggle" class="clickable" title="Play/Pause" playing="" onclick=sendCmd('toggle');></button>
+              <button id="next" class="clickable" title="Next" onclick=sendCmd('next');></button>
+            </div>
+            </div>
+            <hr>
+
+            <p id="title"></p>
+	    <p id="album"></p>
+	    <p id="artist"></p>
+            <p id="info"></p>
+        </div>
+    </div>
+    <script>
+        let oldState = '';
+        function getStatus() {
+	  fetch('?action=status')
+   	    .then(function (response) {
+                let json = response.json();
+		return json;
+	    })
+	    .then(function (data) {
+              updateStatus(data);
+	    })
+	    .catch(function (err) {
+		console.log('error: ' + err);
+	    });
+        }
+
+        function updateStatus(data) {
+            state = data['CurrentTransportState'];
+
+            if(state != oldState) {
+                oldState = state;
+                toggle = document.getElementById("toggle");
+                if(state == 'PLAYING') {
+                    fetchJson();
+                    toggle.setAttribute("playing","true");
+                } else {
+                    toggle.setAttribute("playing","false");
+                } 
+            }
+        }
+
+        function sendCmd(cmd) {
+          
+          if(cmd === "toggle") { 
+            let playing = document.getElementById("toggle").getAttribute("playing");
+            if(playing === "true")
+                cmd = "pause";
+            else
+                cmd = "play";
+          }
+
+	  fetch('?action='+cmd)
+	    .catch(function (err) {
+		console.log('error: ' + err);
+	    });
+        }
+
+	function fetchJson() {
+        fetch('?action=getdata')
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                updateData(data);
+            })
+            .catch(function (err) {
+                console.log('error: ' + err);
+            });
+	}
+
+
+        function updateData(data) {
+            var mainContainer = document.getElementById("myData");
+            var div = document.getElementById("albumcover");
+            div.innerHTML = '<img src="' + data['upnp:albumArtURI'] + '" style="width:100%;"</img>';
+            
+            var el = document.getElementById("title");
+	        el.innerHTML =  data['dc:title'];
+	        el = document.getElementById("artist");
+	        el.innerHTML = data['upnp:artist'];
+	        el = document.getElementById("album");
+            el.innerHTML = data['upnp:album'];
+            var depth = data['song:format_s'];
+            if(depth > 24) depth=24;
+            var actualQuality = data['song:actualQuality'];
+            var rate = data['song:rate_hz'] / 1000.0;
+            if(actualQuality == 'HD')
+ 	        depth = 16;
+
+            if(actualQuality == 'LOSSLESS')
+                actualQuality = "HiFi";
+
+            var bitrate = data['song:bitrate'] / 1000.0;
+            if (isNaN(bitrate))
+              bitrate = "";
+            else bitrate = bitrate + " kbps";
+
+            el = document.getElementById("info");
+            el.innerHTML = `${depth} bits / ${rate} kHz   ${bitrate} - ${actualQuality}`;
+            var artist = encodeURIComponent(data['upnp:artist'].replace(/'/g,""));
+            p = artist.indexOf('(');
+            if(p>0)
+                artist = artist.substring(0,p);
+
+	    var album = encodeURIComponent(data['upnp:album'].replace(/'/g,""));
+            p = album.indexOf('(');
+            if(p>0)
+                album = album.substr(0,p);
+
+
+            var url = `<a href='http://duckduckgo.com/?q=%5Csite:last.fm english ${artist} ${album}' target='lastfm'>Last.fm</a>`;
+            el = document.getElementById("lastfm");
+            el.innerHTML = url;
+
+            var url = `<a href='http://duckduckgo.com/?q=%5Csite:wikiwand.com ${artist} ${album}' target='wiki'>Wikiwand</a>`;
+            el = document.getElementById("wiki");
+            el.innerHTML = url;
+
+       	    var url = `<a href='http://duckduckgo.com/?q=%5Csite:allmusic.com ${artist} ${album}' target='allmusic'>Allmusic</a>`;
+	    el = document.getElementById("allmusic");
+	    el.innerHTML = url;                        
+
+        }
+	setInterval(getStatus,1000);
+	getStatus();
+	fetchJson();
+    </script>
+</body>
+</html>
