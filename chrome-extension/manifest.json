@@ -1,9 +1,9 @@
 {  
   "name": "WiiM Mini",
   "description": "WiiM Mini Viewer",
-  "manifest_version": 2,  
+  "manifest_version": 3,  
   "version": "1.0",  
-  "browser_action": {
+  "action": {
     "default_icon": "logo.png",
     "default_popup": "index.html"
   },
