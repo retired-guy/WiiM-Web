@@ -153,6 +153,7 @@ body .element.left {
 	    <li id="allmusic"></li>
             <li id="lastfm"></li>
             <li id="wiki"></li>
+            <li id="discogs"></li>
             </ul>
             </div>
             <div class="right">
@@ -281,6 +282,9 @@ body .element.left {
 	    el = document.getElementById("allmusic");
 	    el.innerHTML = url;                        
 
+       	    var url = `<a href='http://duckduckgo.com/?q=%5Csite:discogs.com ${artist} ${album}' target='discogs'>Discogs</a>`;
+	    el = document.getElementById("discogs");
+	    el.innerHTML = url;                        
         }
 	setInterval(getStatus,1000);
 	getStatus();
