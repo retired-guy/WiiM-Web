@@ -247,6 +247,9 @@ body .element.left {
             var depth = data['song:format_s'];
             if(depth > 24) depth=24;
             var actualQuality = data['song:actualQuality'];
+	    if(typeof actualQuality != 'string') 
+		actualQuality = actualQuality[0];
+
             var rate = data['song:rate_hz'] / 1000.0;
             if(actualQuality == 'HD')
  	        depth = 16;
@@ -254,10 +257,15 @@ body .element.left {
             if(actualQuality == 'LOSSLESS')
                 actualQuality = "HiFi";
 
-            var bitrate = data['song:bitrate'] / 1000.0;
+            var bitrate = data['song:bitrate'];
             if (isNaN(bitrate))
               bitrate = "";
-            else bitrate = bitrate + " kbps";
+	    else {
+	      if(bitrate > 1000)
+	        bitrate = (bitrate / 1000).toFixed();
+
+	      bitrate = bitrate + " kbps";
+	    }
 
             el = document.getElementById("info");
             el.innerHTML = `${depth} bits / ${rate} kHz   ${bitrate} - ${actualQuality}`;
