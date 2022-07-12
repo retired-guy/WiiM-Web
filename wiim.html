@@ -239,18 +239,42 @@ body .element.left {
             div.innerHTML = '<img src="' + data['upnp:albumArtURI'] + '" style="width:100%;"</img>';
             
             var el = document.getElementById("title");
-	        el.innerHTML =  data['dc:title'];
-	        el = document.getElementById("artist");
-	        el.innerHTML = data['upnp:artist'];
-	        el = document.getElementById("album");
-            el.innerHTML = data['upnp:album'];
+            el.innerHTML =  data['dc:title'];
+
+
+            let artist = encodeURIComponent(data['upnp:artist'].replace(/'/g,""));
+            p = artist.indexOf('(');
+            if(p>0)
+                artist = artist.substring(0,p);
+
+	    let album = encodeURIComponent(data['upnp:album'].replace(/'/g,""));
+            p = album.indexOf('(');
+            if(p>0)
+                album = album.substring(0,p);
+
+	    el = document.getElementById("artist");
+
+            url = `<a href='https://musicbrainz.org/search?query=artist:"${artist}"&type=artist&limit=25&method=advanced' target='artist'>${data['upnp:artist']}</a>`			    
+	    el.innerHTML = url;
+
+	    el = document.getElementById("album");
+            url = `<a href='https://musicbrainz.org/search?query=artist:"${artist}" AND release:"${album}"&type=release&limit=25&method=advanced' target='release'>${data['upnp:album']}</a>`			    
+	    el.innerHTML = url;
+
             var depth = data['song:format_s'];
+	    if(typeof depth != 'string')
+		depth = depth[0]
+
             if(depth > 24) depth=24;
             var actualQuality = data['song:actualQuality'];
 	    if(typeof actualQuality != 'string') 
 		actualQuality = actualQuality[0];
 
-            var rate = data['song:rate_hz'] / 1000.0;
+            var rate = data['song:rate_hz'];
+	    if(typeof rate != 'string')
+	 	rate = rate[0];
+
+	    rate = rate / 1000.0;
             if(actualQuality == 'HD')
  	        depth = 16;
 
@@ -258,9 +282,13 @@ body .element.left {
                 actualQuality = "HiFi";
 
             var bitrate = data['song:bitrate'];
+	    if(typeof bitrate != 'string')
+		bitrate = bitrate[0]
+
             if (isNaN(bitrate))
               bitrate = "";
 	    else {
+				
 	      if(bitrate > 1000)
 	        bitrate = (bitrate / 1000).toFixed();
 
@@ -269,16 +297,6 @@ body .element.left {
 
             el = document.getElementById("info");
             el.innerHTML = `${depth} bits / ${rate} kHz   ${bitrate} - ${actualQuality}`;
-            var artist = encodeURIComponent(data['upnp:artist'].replace(/'/g,""));
-            p = artist.indexOf('(');
-            if(p>0)
-                artist = artist.substring(0,p);
-
-	    var album = encodeURIComponent(data['upnp:album'].replace(/'/g,""));
-            p = album.indexOf('(');
-            if(p>0)
-                album = album.substring(0,p);
-
 
             var url = `<a href='http://duckduckgo.com/?q=%5Csite:last.fm english ${artist} ${album}' target='lastfm'>Lastfm</a>`;
             el = document.getElementById("lastfm");
