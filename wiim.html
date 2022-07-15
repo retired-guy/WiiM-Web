@@ -258,7 +258,7 @@ body .element.left {
 	    el.innerHTML = url;
 
 	    el = document.getElementById("album");
-            url = `<a href='https://musicbrainz.org/search?query=artist:"${artist}" AND release:"${album}"&type=release&limit=25&method=advanced' target='release'>${data['upnp:album']}</a>`			    
+            url = `<a href='https://musicbrainz.org/search?query=artist:"${artist}" AND release:"${album}"&type=release_group&limit=25&method=advanced' target='release'>${data['upnp:album']}</a>`			    
 	    el.innerHTML = url;
 
             var depth = data['song:format_s'];
@@ -267,14 +267,19 @@ body .element.left {
 
             if(depth > 24) depth=24;
             var actualQuality = data['song:actualQuality'];
-	    if(typeof actualQuality != 'string') 
+	    if(typeof(actualQuality) === 'undefined' ) {
+	      actualQuality = ""
+            } else {
+	      if(typeof actualQuality != 'string') 
 		actualQuality = actualQuality[0];
+	    }
 
             var rate = data['song:rate_hz'];
 	    if(typeof rate != 'string')
 	 	rate = rate[0];
 
-	    rate = rate / 1000.0;
+	   rate = rate / 1000.0;
+
             if(actualQuality == 'HD')
  	        depth = 16;
 
@@ -282,21 +287,26 @@ body .element.left {
                 actualQuality = "HiFi";
 
             var bitrate = data['song:bitrate'];
+	    if(typeof bitrate === 'undefined') {
+		bitrate = "";
+	    }
+
 	    if(typeof bitrate != 'string')
 		bitrate = bitrate[0]
 
+	    console.log(rate,depth,bitrate)
             if (isNaN(bitrate))
               bitrate = "";
 	    else {
 				
-	      if(bitrate > 1000)
+	      if(bitrate > 10000)
 	        bitrate = (bitrate / 1000).toFixed();
 
 	      bitrate = bitrate + " kbps";
 	    }
 
             el = document.getElementById("info");
-            el.innerHTML = `${depth} bits / ${rate} kHz   ${bitrate} - ${actualQuality}`;
+            el.innerHTML = `${depth} bits / ${rate} kHz   ${bitrate} ${actualQuality}`;
 
             var url = `<a href='http://duckduckgo.com/?q=%5Csite:last.fm english ${artist} ${album}' target='lastfm'>Lastfm</a>`;
             el = document.getElementById("lastfm");

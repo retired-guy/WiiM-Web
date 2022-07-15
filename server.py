@@ -56,6 +56,7 @@ class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 ####################################################################
 #### Change the ip address to that of your WiiM Mini
 dev = upnpclient.Device("http://192.168.68.112:49152/description.xml")
+#dev = upnpclient.Device("http://192.168.68.136:1400/xml/device_description.xml")
 ####################################################################
 
 # Create an object of the above class
