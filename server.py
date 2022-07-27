@@ -27,6 +27,13 @@ class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 obj = dev.AVTransport.GetMediaInfo(InstanceID='0')
                 meta = obj['CurrentURIMetaData']
                 items = xmltodict.parse(meta)["DIDL-Lite"]["item"]
+                try:
+                    print(obj["TrackSource"])
+                    items["TrackSource"] = obj["TrackSource"]
+                except:
+                    print("Error adding TrackSource")
+                    pass
+
                 self.wfile.write(str.encode(json.dumps(items)))
                 return
 
