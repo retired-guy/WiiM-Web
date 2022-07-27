@@ -28,7 +28,6 @@ class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 meta = obj['CurrentURIMetaData']
                 items = xmltodict.parse(meta)["DIDL-Lite"]["item"]
                 try:
-                    print(obj["TrackSource"])
                     items["TrackSource"] = obj["TrackSource"]
                 except:
                     print("Error adding TrackSource")
